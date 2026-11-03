@@ -1,0 +1,38 @@
+name: Vault Guardian
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "modules/**"
+      - "scripts/vault_guardian.py"
+      - "GUARDIAN_POLICY.md"
+      - ".github/workflows/vault-guardian.yml"
+  push:
+    branches: [main]
+    paths:
+      - "modules/**"
+      - "scripts/vault_guardian.py"
+      - "GUARDIAN_POLICY.md"
+      - ".github/workflows/vault-guardian.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vault-guardian-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  admission-gate:
+    name: Vault Guardian / admission-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate every module against admission policy
+        run: python scripts/vault_guardian.py
